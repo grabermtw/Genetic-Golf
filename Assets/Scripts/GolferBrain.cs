@@ -4,9 +4,16 @@ using UnityEngine;
 
 public class GolferBrain : MonoBehaviour
 {
-    public Rigidbody[] joints; // Think of these as muscles
-    public GameObject[] golfClubs;
-    public bool useGravity;
+    [SerializeField]
+    private Rigidbody[] joints = null; // Think of these as muscles
+    [SerializeField]
+    private GameObject[] golfClubs = null;
+    [SerializeField]
+    private Rigidbody golfBall = null;
+    [SerializeField]
+    private Transform hole = null;
+    [SerializeField]
+    private bool useGravity;
 
     private Chromosome chrom;
     private bool swinging;
@@ -52,6 +59,7 @@ public class GolferBrain : MonoBehaviour
         StartCoroutine(MoveJoints());
     }
 
+    // Call this to interrupt the MoveJoints coroutine
     public void StopSwinging()
     {
         swinging = false;
@@ -75,6 +83,32 @@ public class GolferBrain : MonoBehaviour
             }
             yield return new WaitForFixedUpdate();
         }
+    }
+
+    /*  Calculates and returns the fitness of this agent
+        If drivingRange is true, then calculate based on total distance the ball traveled
+        in the direction the agent is supposed to be swinging.
+        Otherwise, calculate fitness based on the distance from the ball to the hole.
+        Note that when drivingRange = true, a higher value returned by this function
+        indicates a better fitness, but when drivingRange = false, a lower value returned
+        by this function indicates a better function. */
+    public float GetFitness(bool drivingRange = false)
+    {
+        float fitness;
+        if (drivingRange)
+        {
+            // Calculate fitness based on total distance ball has traveled in agent's direction
+            float ballDist = Vector3.Distance(golfBall.position, transform.position);
+            Vector3 ballDir = golfBall.position - transform.position;
+            float ballAngle = Vector3.Angle(ballDir, -transform.right);
+            fitness = ballDist * Mathf.Cos(ballAngle);
+        }
+        else
+        {
+            // Calculate fitness based on accuracy of hitting it toward the hole
+            fitness = Vector3.Distance(golfBall.position, hole.position);
+        }
+        return fitness;
     }
 
 }
