@@ -2,24 +2,6 @@ using UnityEngine;
 
 public class Chromosome
 {
-    public enum Fitness
-    {
-        drivingDist,
-        accuracy
-    }
-
-    public enum MoveableJointsExtent
-    {
-        fullBody,
-        armsTorso
-    }
-
-    public enum ClubGrip
-    {
-        oneHand,
-        twoHands
-    }
-
     /*  Each element is a torque that will be applied to the
         corresponding joint every frame.
         This can be made more elaborate later.
@@ -29,15 +11,12 @@ public class Chromosome
         Could result in more complex movement) */
     public Vector3[] torques;
 
-    public Fitness fitnessFunc;
-
 
     /* Add other fields here later perhaps (golf clubs?) */
 
-    public Chromosome(Vector3[] torques, Fitness fitnessFunc)
+    public Chromosome(Vector3[] torques)
     {
         this.torques = torques;
-        this.fitnessFunc = fitnessFunc;
     }
 
 }

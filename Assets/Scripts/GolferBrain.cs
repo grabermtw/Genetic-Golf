@@ -16,6 +16,7 @@ public class GolferBrain : MonoBehaviour
     private bool useGravity;
 
     private Chromosome chrom;
+    private GolferSettings settings;
     private bool swinging;
     
 
@@ -28,16 +29,20 @@ public class GolferBrain : MonoBehaviour
         {
             testTorques[i] = new Vector3(Random.Range(0,1000),Random.Range(0,1000),Random.Range(0,1000));
         }
-        SetChromosome(new Chromosome(testTorques, Chromosome.Fitness.drivingDist));
+        InitializeAgent(new Chromosome(testTorques),
+                        new GolferSettings(GolferSettings.Fitness.accuracy,
+                                           GolferSettings.MoveableJointsExtent.fullBody,
+                                           GolferSettings.ClubGrip.twoHands));
         BeginSwinging();
     }
 
     // This should be called right after the golfer is instantiated
-    public void SetChromosome(Chromosome newChrom)
+    public void InitializeAgent(Chromosome newChrom, GolferSettings newSettings)
     {
         chrom = newChrom;
+        settings = newSettings;
         // hide the golf hole if we don't need it
-        if (chrom.fitnessFunc == Chromosome.Fitness.drivingDist)
+        if (settings.fitnessFunc == GolferSettings.Fitness.drivingDist)
             hole.gameObject.SetActive(false);
     }
 
@@ -93,17 +98,16 @@ public class GolferBrain : MonoBehaviour
     public float GetFitness()
     {
         float fitness = 0;
-        switch(chrom.fitnessFunc)
+        switch(settings.fitnessFunc)
         {
-            case Chromosome.Fitness.drivingDist:
+            case GolferSettings.Fitness.drivingDist:
                 // Calculate fitness based on total distance ball has traveled in agent's direction
                 float ballDist = Vector3.Distance(golfBall.position, transform.position);
                 Vector3 ballDir = golfBall.position - transform.position;
                 float ballAngle = Vector3.Angle(ballDir, -transform.right);
                 fitness = ballDist * Mathf.Cos(ballAngle);
                 break;
-            
-            case Chromosome.Fitness.accuracy:
+            case GolferSettings.Fitness.accuracy:
                 // Calculate fitness based on accuracy of hitting it toward the hole
                 fitness = Vector3.Distance(golfBall.position, hole.position);
             break;

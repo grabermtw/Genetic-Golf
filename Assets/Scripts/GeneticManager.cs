@@ -16,9 +16,9 @@ public class GeneticManager : MonoBehaviour
     private TMP_InputField numAgentsInput;
 
     private int numAgents; // number of agents (golfers) in each generation
-    private Chromosome.Fitness fitnessFunc;
-    private Chromosome.MoveableJointsExtent moveableJoints;
-    private Chromosome.ClubGrip clubGrip;
+    private GolferSettings.Fitness fitnessFunc;
+    private GolferSettings.MoveableJointsExtent moveableJoints;
+    private GolferSettings.ClubGrip clubGrip;
 
 
     // Start is called before the first frame update
@@ -46,9 +46,9 @@ public class GeneticManager : MonoBehaviour
             return;
         }
         // Get the values from the dropdown options
-        fitnessFunc = (Chromosome.Fitness) fitnessDropdown.value;
-        moveableJoints = (Chromosome.MoveableJointsExtent) jointsDropdown.value;
-        clubGrip = (Chromosome.ClubGrip) gripDropdown.value;
+        fitnessFunc = (GolferSettings.Fitness) fitnessDropdown.value;
+        moveableJoints = (GolferSettings.MoveableJointsExtent) jointsDropdown.value;
+        clubGrip = (GolferSettings.ClubGrip) gripDropdown.value;
 
         
         
