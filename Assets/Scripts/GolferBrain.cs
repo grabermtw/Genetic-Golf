@@ -28,7 +28,7 @@ public class GolferBrain : MonoBehaviour
         {
             testTorques[i] = new Vector3(Random.Range(0,1000),Random.Range(0,1000),Random.Range(0,1000));
         }
-        SetChromosome(new Chromosome(testTorques));
+        SetChromosome(new Chromosome(testTorques, Chromosome.Fitness.drivingDist));
         BeginSwinging();
     }
 
@@ -36,6 +36,9 @@ public class GolferBrain : MonoBehaviour
     public void SetChromosome(Chromosome newChrom)
     {
         chrom = newChrom;
+        // hide the golf hole if we don't need it
+        if (chrom.fitnessFunc == Chromosome.Fitness.drivingDist)
+            hole.gameObject.SetActive(false);
     }
 
     // Returns the number of joints in use
@@ -86,27 +89,27 @@ public class GolferBrain : MonoBehaviour
     }
 
     /*  Calculates and returns the fitness of this agent
-        If drivingRange is true, then calculate based on total distance the ball traveled
-        in the direction the agent is supposed to be swinging.
-        Otherwise, calculate fitness based on the distance from the ball to the hole.
-        Note that when drivingRange = true, a higher value returned by this function
-        indicates a better fitness, but when drivingRange = false, a lower value returned
-        by this function indicates a better function. */
-    public float GetFitness(bool drivingRange = false)
+        based on what our chromosome says our fitness function should be */
+    public float GetFitness()
     {
-        float fitness;
-        if (drivingRange)
+        float fitness = 0;
+        switch(chrom.fitnessFunc)
         {
-            // Calculate fitness based on total distance ball has traveled in agent's direction
-            float ballDist = Vector3.Distance(golfBall.position, transform.position);
-            Vector3 ballDir = golfBall.position - transform.position;
-            float ballAngle = Vector3.Angle(ballDir, -transform.right);
-            fitness = ballDist * Mathf.Cos(ballAngle);
-        }
-        else
-        {
-            // Calculate fitness based on accuracy of hitting it toward the hole
-            fitness = Vector3.Distance(golfBall.position, hole.position);
+            case Chromosome.Fitness.drivingDist:
+                // Calculate fitness based on total distance ball has traveled in agent's direction
+                float ballDist = Vector3.Distance(golfBall.position, transform.position);
+                Vector3 ballDir = golfBall.position - transform.position;
+                float ballAngle = Vector3.Angle(ballDir, -transform.right);
+                fitness = ballDist * Mathf.Cos(ballAngle);
+                break;
+            
+            case Chromosome.Fitness.accuracy:
+                // Calculate fitness based on accuracy of hitting it toward the hole
+                fitness = Vector3.Distance(golfBall.position, hole.position);
+            break;
+            default:
+                Debug.LogWarning("Unrecognized fitness function");
+                break;
         }
         return fitness;
     }
