@@ -50,7 +50,9 @@ public class GolferBrain : MonoBehaviour
         settings = newSettings;
         // hide the golf hole if we don't need it
         if (settings.fitnessFunc == GolferSettings.Fitness.drivingDist)
+        {
             hole.gameObject.SetActive(false);
+        }
         else 
         {   // position the hole based on the distance it's supposed to be from the golfer, maintaining the y-coordinate
             hole.position = transform.position - Vector3.right * (settings.holeDist + holeDistOffset) + new Vector3(0, hole.position.y, 0);

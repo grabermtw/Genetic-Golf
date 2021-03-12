@@ -2,8 +2,8 @@ public readonly struct GolferSettings
 {
     public enum Fitness
     {
-        drivingDist,
-        accuracy
+        accuracy,
+        drivingDist
     }
 
     public enum MoveableJointsExtent

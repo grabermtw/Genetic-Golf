@@ -12,7 +12,7 @@ public class GeneticManager : MonoBehaviour
 
     // References to menu input stuff
     [SerializeField]
-    private GameObject uiParent;
+    private GameObject menuUIParent;
     [SerializeField]
     private TMP_Dropdown fitnessDropdown;
     [SerializeField]
@@ -35,6 +35,11 @@ public class GeneticManager : MonoBehaviour
     private TMP_InputField numGensInput;
     [SerializeField]
     private TextMeshProUGUI approxTime;
+    
+    [SerializeField]
+    private GameObject simulationUI; // UI appearing in the top corner while running the simulation
+    [SerializeField]
+    private TextMeshProUGUI currentGenText; // displays the current generation number
 
     private GolferSettings.Fitness fitnessFunc;
     private GolferSettings.MoveableJointsExtent moveableJoints;
@@ -52,8 +57,8 @@ public class GeneticManager : MonoBehaviour
     private float[] fitnesses;
     private GolferSettings settings;
 
-    private const float INIT_TORQUE_MAG = 1000; // highest possible magnitude a torque component can have initially
-    private const float DIST_BETWEEN_AGENTS = 4; // distance between active agents
+    private const float INIT_TORQUE_MAG = 500; // highest possible magnitude a torque component can have initially
+    private const float DIST_BETWEEN_AGENTS = 5; // distance between active agents
 
     // Called before the first frame update
     void Start()
@@ -130,12 +135,18 @@ public class GeneticManager : MonoBehaviour
         settings = new GolferSettings(fitnessFunc, moveableJoints, clubGrip, holeDist);
 
         // hide the main menu UI
-        uiParent.SetActive(false);
+        menuUIParent.SetActive(false);
+        // display the simulation UI
+        simulationUI.SetActive(true);
         // Begin the simulation coroutine
         StartCoroutine(Simulate());
     }
 
+
+
     // --------------- ACTUAL GENETIC ALGORITHM STUFF BELOW ----------------
+
+
 
     // Here is where the actual simulations are managed
     private IEnumerator Simulate()
@@ -157,7 +168,7 @@ public class GeneticManager : MonoBehaviour
             Vector3[] initTorques = new Vector3[numJoints];
             for (int j = 0; j < initTorques.Length; j++)
             {
-                initTorques[i] = new Vector3(Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG),
+                initTorques[j] = new Vector3(Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG),
                                              Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG),
                                              Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG));
             }
@@ -166,6 +177,9 @@ public class GeneticManager : MonoBehaviour
 
         for (int i = 0; i < numGens; i++)
         {
+            // display the current generation number
+            currentGenText.text = "" + (i + 1);
+
             // Determine the random hole distance offset for this generation
             // (if holeDistRand == 0 then it will just be 0)
             holeDistOffset = Random.Range(-holeDistRand, holeDistRand);
@@ -173,7 +187,7 @@ public class GeneticManager : MonoBehaviour
             // Instantiate new agents, give them their respective chromosomes, tell them to start swinging their clubs
             for (int j = 0; j < agents.Length; j++)
             {
-                agents[j] = Instantiate(agentPrefab, new Vector3(0, 0, j * DIST_BETWEEN_AGENTS), Quaternion.identity);
+                agents[j] = Instantiate(agentPrefab, new Vector3(0, 0, - j * DIST_BETWEEN_AGENTS), Quaternion.identity);
                 agents[j].GetComponent<GolferBrain>().InitializeAgent(chroms[j], settings, holeDistOffset);
                 agents[j].GetComponent<GolferBrain>().BeginSwinging();
             }
@@ -183,7 +197,7 @@ public class GeneticManager : MonoBehaviour
             yield return new WaitForSeconds(timePerGen);
 
             // Get the fitnesses of the agents and then clear them out
-            for (int j = 0; i < agents.Length; j++)
+            for (int j = 0; j < agents.Length; j++)
             {
                 fitnesses[j] = agents[j].GetComponent<GolferBrain>().GetFitness();
                 Destroy(agents[j]);
@@ -197,17 +211,25 @@ public class GeneticManager : MonoBehaviour
                 Use crossoverProb and mutationProb for probabilities
                 Then just need to fill out the chroms array again with the new chromosomes.
 
+                Note that if
+                fitnessFunc == GolferSettings.Fitness.accuracy
+                then more fit agents will have a lower fitness value, as the fitness is the distance
+                from the ball to the hole.
+                Otherwise, if
+                fitnessFunc == GolferSettings.Fitness.drivingDist
+                then more fit agents will have a larger fitness value, as the fitness is the distance that
+                they hit the ball.
+
                 Also, we should keep track of fitnessess across generations,
                 as well as keep track of the most fit chromosome.
-                If we wanna just save these in a variable for now, later on we can display this info
+                We can just save these in a variable for now, later on we can display this info
                 more usefully.
             */
             
 
         }
         
-
-        yield return null;
+        yield break;
     }
     
 
