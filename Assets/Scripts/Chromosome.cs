@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class Chromosome
 {
-    /*  Each element is a torque that will be applied to the
-        corresponding joint every frame.
+    /*  Each element is a torque (represented as a Vector3)
+        that will be applied to the corresponding joint every frame.
         This can be made more elaborate later.
         (maybe make this an array of Lists of Vector3 torques,
         with each list corresponding to a joint, and each torque in

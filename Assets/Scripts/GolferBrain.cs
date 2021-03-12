@@ -130,7 +130,8 @@ public class GolferBrain : MonoBehaviour
                 break;
             case GolferSettings.Fitness.accuracy:
                 // Calculate fitness based on accuracy of hitting it toward the hole
-                fitness = Vector3.Distance(golfBall.position, hole.position);
+                // make this negative so that more fit agents will always have higher fitness values
+                fitness = - Vector3.Distance(golfBall.position, hole.position);
                 break;
             default:
                 Debug.LogWarning("Unrecognized fitness function");

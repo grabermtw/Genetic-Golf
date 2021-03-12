@@ -203,32 +203,25 @@ public class GeneticManager : MonoBehaviour
                 Destroy(agents[j]);
             }
 
+
             /* ---------- TODO: HANDLE CHROMOSOMES ----------
-                This is where we wanna do the crossover/mutation stuff.
+                This is where we should do the crossover/mutation stuff.
                 Need to fill out Crossover() and Mutate() methods.
                 Need to handle deciding when crossover and mutation occurs
                 and for which chromosomes.
                 Use crossoverProb and mutationProb for probabilities
                 Then just need to fill out the chroms array again with the new chromosomes.
 
-                Note that if
-                fitnessFunc == GolferSettings.Fitness.accuracy
-                then more fit agents will have a lower fitness value, as the fitness is the distance
-                from the ball to the hole.
-                Otherwise, if
-                fitnessFunc == GolferSettings.Fitness.drivingDist
-                then more fit agents will have a larger fitness value, as the fitness is the distance that
-                they hit the ball.
-
-                Also, we should keep track of fitnessess across generations,
-                as well as keep track of the most fit chromosome.
-                We can just save these in a variable for now, later on we can display this info
-                more usefully.
+                Also, we should keep track of fitnessess across generations so that we can
+                call ExportCSV() at the end.
+                
+                We should also keep track of the most fit chromosome.
+                We can just save this in a variable for now, later on we can display
+                this info about it more usefully.
             */
             
 
         }
-        
         yield break;
     }
     
@@ -244,6 +237,18 @@ public class GeneticManager : MonoBehaviour
     {
         // TODO
         return null;
+    }
+
+
+    
+    public void ExportCSV()
+    {
+        // TODO
+        /*  Export a CSV showing best fitness and avg fitness for each generation.
+            Maybe include info about the parameters used for this run as well
+            either at the beginning or the end, such as the fields in GolfSettings
+            as well as the timePerGen, mutationProb, crossoverProb, holeDist, holeDistRand etc.
+        */
     }
 
 }
