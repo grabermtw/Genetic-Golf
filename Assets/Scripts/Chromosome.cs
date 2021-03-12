@@ -11,9 +11,7 @@ public class Chromosome
         Could result in more complex movement) */
     public Vector3[] torques;
 
-
     /* Add other fields here later perhaps (golf clubs?) */
-
     public Chromosome(Vector3[] torques)
     {
         this.torques = torques;

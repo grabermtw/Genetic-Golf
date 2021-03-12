@@ -1,23 +1,30 @@
-﻿using System.Collections;
+﻿/* 
+    This script is attached to each agent that gets instantiated.
+*/
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GolferBrain : MonoBehaviour
 {
     [SerializeField]
-    private Rigidbody[] joints = null; // Think of these as muscles
+    private Rigidbody[] joints; // Think of these as muscles
     [SerializeField]
-    private GameObject[] golfClubs = null;
+    private FixedJoint secondHandJoint; // joint for the second hand which will be destroyed if going one-handed
     [SerializeField]
-    private Rigidbody golfBall = null;
+    private GameObject[] golfClubs;
     [SerializeField]
-    private Transform hole = null;
+    private Rigidbody golfBall;
+    [SerializeField]
+    private Transform hole;
     [SerializeField]
     private bool useGravity;
 
     private Chromosome chrom;
     private GolferSettings settings;
     private bool swinging;
+    private float actualHoleDist;
     
 
     // Start is called before the first frame update
@@ -31,25 +38,28 @@ public class GolferBrain : MonoBehaviour
         }
         InitializeAgent(new Chromosome(testTorques),
                         new GolferSettings(GolferSettings.Fitness.accuracy,
-                                           GolferSettings.MoveableJointsExtent.fullBody,
-                                           GolferSettings.ClubGrip.twoHands));
+                                           GolferSettings.MoveableJointsExtent.armsTorso,
+                                           GolferSettings.ClubGrip.oneHand, 4f));
         BeginSwinging();
     }
 
     // This should be called right after the golfer is instantiated
-    public void InitializeAgent(Chromosome newChrom, GolferSettings newSettings)
+    public void InitializeAgent(Chromosome newChrom, GolferSettings newSettings, float holeDistOffset = 0)
     {
         chrom = newChrom;
         settings = newSettings;
         // hide the golf hole if we don't need it
         if (settings.fitnessFunc == GolferSettings.Fitness.drivingDist)
             hole.gameObject.SetActive(false);
-    }
-
-    // Returns the number of joints in use
-    public int GetNumberOfJoints()
-    {
-        return joints.Length;
+        else 
+        {   // position the hole based on the distance it's supposed to be from the golfer, maintaining the y-coordinate
+            hole.position = transform.position - Vector3.right * (settings.holeDist + holeDistOffset) + new Vector3(0, hole.position.y, 0);
+            actualHoleDist = Vector3.Distance(transform.position, hole.position);
+        }
+        
+        // Destroy the joint connecting the club to the second hand if we're going one-handed
+        if (settings.clubGrip == GolferSettings.ClubGrip.oneHand)
+            Destroy(secondHandJoint);
     }
 
     // Begin the golfing simulation with this agent by allowing it to swing the club
@@ -61,8 +71,14 @@ public class GolferBrain : MonoBehaviour
             allowing them to move. */
         foreach(Rigidbody joint in joints)
         {
-            joint.isKinematic = false;
-            joint.useGravity = useGravity;
+            // unlock every joint if we're doing the full body, and if we're just doing torso and arms,
+            // don't unlock the legs
+            if (settings.moveableJoints == GolferSettings.MoveableJointsExtent.fullBody ||
+                (!joint.gameObject.name.Contains("Leg") && !joint.gameObject.name.Contains("Hips")))
+            {
+                joint.isKinematic = false;
+                joint.useGravity = useGravity;
+            }
         }
         StartCoroutine(MoveJoints());
     }
@@ -87,7 +103,10 @@ public class GolferBrain : MonoBehaviour
                 /*  consider multiplying by the distance to the hole to
                     explore if that makes the agent better able to hit holes at different
                     distances */
-                joints[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime);
+                // no consideration of distance to hole
+                // joints[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime); 
+                // consideration of distance to hole (see if this helps when hole position is randomized)
+                joints[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime * actualHoleDist);
             }
             yield return new WaitForFixedUpdate();
         }
@@ -110,7 +129,7 @@ public class GolferBrain : MonoBehaviour
             case GolferSettings.Fitness.accuracy:
                 // Calculate fitness based on accuracy of hitting it toward the hole
                 fitness = Vector3.Distance(golfBall.position, hole.position);
-            break;
+                break;
             default:
                 Debug.LogWarning("Unrecognized fitness function");
                 break;

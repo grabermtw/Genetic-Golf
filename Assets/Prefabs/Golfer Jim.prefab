@@ -236,12 +236,14 @@ MonoBehaviour:
   - {fileID: 8351944591880817724}
   - {fileID: 8351944592913041169}
   - {fileID: 8351944592029329063}
+  - {fileID: 8351944591779759116}
+  secondHandJoint: {fileID: 8351944591605203034}
   golfClubs:
   - {fileID: 9162987455189770929}
   - {fileID: 9162987453502024541}
   - {fileID: 9162987453476149705}
   golfBall: {fileID: 8351944591718554534}
-  hole: {fileID: 0}
+  hole: {fileID: 8351944592860550178}
   useGravity: 1
 --- !u!1 &8351944592691811813
 GameObject:
@@ -645,7 +647,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2047766354, guid: 014137bdf85a0904287e5485f118da75, type: 3}
       propertyPath: m_IsKinematic
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2080663393, guid: 014137bdf85a0904287e5485f118da75, type: 3}
       propertyPath: m_ConnectedAnchor.x
@@ -936,6 +938,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8351944593289866078}
   m_PrefabAsset: {fileID: 0}
+--- !u!54 &8351944591779759116 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 2047766354, guid: 014137bdf85a0904287e5485f118da75,
+    type: 3}
+  m_PrefabInstance: {fileID: 8351944593289866078}
+  m_PrefabAsset: {fileID: 0}
 --- !u!54 &8351944591880817724 stripped
 Rigidbody:
   m_CorrespondingSourceObject: {fileID: 2080663394, guid: 014137bdf85a0904287e5485f118da75,
@@ -990,9 +998,9 @@ Rigidbody:
     type: 3}
   m_PrefabInstance: {fileID: 8351944593289866078}
   m_PrefabAsset: {fileID: 0}
---- !u!54 &8351944593288898450 stripped
+--- !u!54 &8351944591725437444 stripped
 Rigidbody:
-  m_CorrespondingSourceObject: {fileID: 7589068, guid: 014137bdf85a0904287e5485f118da75,
+  m_CorrespondingSourceObject: {fileID: 1732462938, guid: 014137bdf85a0904287e5485f118da75,
     type: 3}
   m_PrefabInstance: {fileID: 8351944593289866078}
   m_PrefabAsset: {fileID: 0}
@@ -1002,9 +1010,9 @@ Rigidbody:
     type: 3}
   m_PrefabInstance: {fileID: 8351944593289866078}
   m_PrefabAsset: {fileID: 0}
---- !u!54 &8351944591725437444 stripped
+--- !u!54 &8351944593288898450 stripped
 Rigidbody:
-  m_CorrespondingSourceObject: {fileID: 1732462938, guid: 014137bdf85a0904287e5485f118da75,
+  m_CorrespondingSourceObject: {fileID: 7589068, guid: 014137bdf85a0904287e5485f118da75,
     type: 3}
   m_PrefabInstance: {fileID: 8351944593289866078}
   m_PrefabAsset: {fileID: 0}
