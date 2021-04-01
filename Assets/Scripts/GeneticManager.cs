@@ -215,7 +215,7 @@ public class GeneticManager : MonoBehaviour
                 This is where we should do the crossover/mutation stuff.
                 Need to fill out Crossover() and Mutate() methods.
                 
-                ***TASK FOR SOMEONE TO DO***
+                Vlad
                 Need to handle deciding when crossover and mutation occurs
                 and for which chromosomes.
                 Use crossoverProb and mutationProb for probabilities
@@ -223,7 +223,7 @@ public class GeneticManager : MonoBehaviour
 
                 
                 
-                ***TASK FOR SOMEONE TO DO***
+                Azhdaha
                 Also, we should keep track of fitnessess across generations so that we can
                 call ExportCSV() at the end.
                 We should also keep track of the most fit chromosome.
@@ -239,14 +239,14 @@ public class GeneticManager : MonoBehaviour
 
     private Chromosome Crossover(Chromosome parentOne, Chromosome parentTwo)
     {
-        // TODO - ***TASK FOR SOMEONE TO DO***
+        // TODO - Andrew
         return null;
     }
 
 
     private Chromosome Mutate(Chromosome parent)
     {
-        // TODO - ***TASK FOR SOMEONE TO DO***
+        // TODO - Ernest
         return null;
     }
 
@@ -254,7 +254,7 @@ public class GeneticManager : MonoBehaviour
     
     public void ExportCSV()
     {
-        // TODO - ***TASK FOR SOMEONE TO DO***
+        // TODO - John
         /*  Export a CSV showing best fitness and avg fitness for each generation.
             Maybe include info about the parameters used for this run as well
             either at the beginning or the end, such as the fields in GolfSettings
