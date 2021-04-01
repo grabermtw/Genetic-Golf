@@ -23,30 +23,16 @@ public class GolferBrain : MonoBehaviour
 
     private Chromosome chrom;
     private GolferSettings settings;
+    private Rigidbody[] jointsInUse; // the joints that are actually being used in this sim (may or may not be full body)
     private bool swinging;
     private float actualHoleDist;
     
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        // Code for testing muscles, remove later
-        Vector3[] testTorques = new Vector3[joints.Length];
-        for (int i = 0; i < testTorques.Length; i++)
-        {
-            testTorques[i] = new Vector3(Random.Range(0,1000),Random.Range(0,1000),Random.Range(0,1000));
-        }
-        InitializeAgent(new Chromosome(testTorques),
-                        new GolferSettings(GolferSettings.Fitness.accuracy,
-                                           GolferSettings.MoveableJointsExtent.armsTorso,
-                                           GolferSettings.ClubGrip.oneHand, 4f));
-        BeginSwinging();
-    }
 
     // This should be called right after the golfer is instantiated
     public void InitializeAgent(Chromosome newChrom, GolferSettings newSettings, float holeDistOffset = 0)
     {
         chrom = newChrom;
+        jointsInUse = new Rigidbody[chrom.torques.Length];
         settings = newSettings;
         // hide the golf hole if we don't need it
         if (settings.fitnessFunc == GolferSettings.Fitness.drivingDist)
@@ -71,6 +57,7 @@ public class GolferBrain : MonoBehaviour
             By default, all joints will be kinematic (meaning physics does not act upon them).
             Here, we set all joints that are added to the joints array to not be kinematic,
             allowing them to move. */
+        int jointIndex = 0;
         foreach(Rigidbody joint in joints)
         {
             // unlock every joint if we're doing the full body, and if we're just doing torso and arms,
@@ -80,6 +67,8 @@ public class GolferBrain : MonoBehaviour
             {
                 joint.isKinematic = false;
                 joint.useGravity = useGravity;
+                if (!joint.gameObject.name.Contains("Hips"))
+                    jointsInUse[jointIndex++] = joint;
             }
         }
         StartCoroutine(MoveJoints());
@@ -99,7 +88,7 @@ public class GolferBrain : MonoBehaviour
         swinging = true;
         while (swinging)
         {
-            for (int i = 0; i < joints.Length; i++)
+            for (int i = 0; i < jointsInUse.Length; i++)
             {
                 // multiplying by Time.fixedDeltaTime keeps it framerate-independent
                 /*  consider multiplying by the distance to the hole to
@@ -108,7 +97,7 @@ public class GolferBrain : MonoBehaviour
                 // no consideration of distance to hole
                 // joints[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime); 
                 // consideration of distance to hole (see if this helps when hole position is randomized)
-                joints[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime * actualHoleDist);
+                jointsInUse[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime * actualHoleDist);
             }
             yield return new WaitForFixedUpdate();
         }

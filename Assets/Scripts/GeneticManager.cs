@@ -151,6 +151,9 @@ public class GeneticManager : MonoBehaviour
     // Here is where the actual simulations are managed
     private IEnumerator Simulate()
     {
+
+        // ----------- CREATE INITIAL POPULATION, SET UP SIMULATION ------------
+
         float holeDistOffset;
 
         // Initialize arrays
@@ -159,7 +162,7 @@ public class GeneticManager : MonoBehaviour
         fitnesses = new float[numAgents];
 
         // determine the number of joints based on whether we're using the golfer's full body or not
-        int numJoints = (moveableJoints == GolferSettings.MoveableJointsExtent.fullBody ? 13 : 8);
+        int numJoints = (moveableJoints == GolferSettings.MoveableJointsExtent.fullBody ? 12 : 8);
 
         // initialize chromosomes with random values
         for (int i = 0; i < chroms.Length; i++)
@@ -174,6 +177,8 @@ public class GeneticManager : MonoBehaviour
             }
             chroms[i] = new Chromosome(initTorques);
         }
+
+        // ----------- RUN THE SIMULATION ------------
 
         for (int i = 0; i < numGens; i++)
         {
@@ -205,16 +210,22 @@ public class GeneticManager : MonoBehaviour
 
 
             /* ---------- TODO: HANDLE CHROMOSOMES ----------
+
+                
                 This is where we should do the crossover/mutation stuff.
                 Need to fill out Crossover() and Mutate() methods.
+                
+                ***TASK FOR SOMEONE TO DO***
                 Need to handle deciding when crossover and mutation occurs
                 and for which chromosomes.
                 Use crossoverProb and mutationProb for probabilities
                 Then just need to fill out the chroms array again with the new chromosomes.
 
+                
+                
+                ***TASK FOR SOMEONE TO DO***
                 Also, we should keep track of fitnessess across generations so that we can
                 call ExportCSV() at the end.
-                
                 We should also keep track of the most fit chromosome.
                 We can just save this in a variable for now, later on we can display
                 this info about it more usefully.
@@ -228,14 +239,14 @@ public class GeneticManager : MonoBehaviour
 
     private Chromosome Crossover(Chromosome parentOne, Chromosome parentTwo)
     {
-        // TODO
+        // TODO - ***TASK FOR SOMEONE TO DO***
         return null;
     }
 
 
     private Chromosome Mutate(Chromosome parent)
     {
-        // TODO
+        // TODO - ***TASK FOR SOMEONE TO DO***
         return null;
     }
 
@@ -243,7 +254,7 @@ public class GeneticManager : MonoBehaviour
     
     public void ExportCSV()
     {
-        // TODO
+        // TODO - ***TASK FOR SOMEONE TO DO***
         /*  Export a CSV showing best fitness and avg fitness for each generation.
             Maybe include info about the parameters used for this run as well
             either at the beginning or the end, such as the fields in GolfSettings
