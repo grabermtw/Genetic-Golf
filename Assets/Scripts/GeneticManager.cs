@@ -209,11 +209,33 @@ public class GeneticManager : MonoBehaviour
             }
 
 
+            //Crossover selection
+            //Tournament selection with 2 candidates for each parent
+            int cand1idx = Random.Range(0, numAgents);
+            int cand2idx = cand1idx;
+            while(cand2idx == cand1idx){
+                cand2idx = Random.Range(0, numAgents);
+            }
+            int par1idx;
+            int par2idx;
+            if(fitnesses[cand1idx] > fitnesses[cand2idx]){
+                par1idx = cand1idx;
+                par2idx = cand2idx;
+            } else {
+                par2idx = cand1idx;
+                par1idx = cand2idx;
+            }
+            float crossValue = Random.Range(0.0f, 1.0f);
+            if(crossValue < crossoverProb){
+                Crossover(chroms[par1idx], chroms[par2idx]);
+            }
+
             /* ---------- TODO: HANDLE CHROMOSOMES ----------
 
                 
                 This is where we should do the crossover/mutation stuff.
                 Need to fill out Crossover() and Mutate() methods.
+                
                 
                 Vlad
                 Need to handle deciding when crossover and mutation occurs
@@ -237,10 +259,18 @@ public class GeneticManager : MonoBehaviour
     }
     
 
-    private Chromosome Crossover(Chromosome parentOne, Chromosome parentTwo)
+    private void Crossover(Chromosome parentOne, Chromosome parentTwo)
     {
-        // TODO - Andrew
-        return null;
+
+        int crossPoint = Random.Range(1,3);
+        //Debug.Log("Before: " + parentOne.torques[0] + ", " + parentTwo.torques[0]);
+        //Debug.Log("Cross point: " + crossPoint);
+        for(int i = crossPoint; i < 3; i++){
+            float temp = parentOne.torques[0][i];
+            parentOne.torques[0][i] = parentTwo.torques[0][i];
+            parentTwo.torques[0][i] = temp;
+        }
+        //Debug.Log("Before: " + parentOne.torques[0] + ", " + parentTwo.torques[0]);
     }
 
 
