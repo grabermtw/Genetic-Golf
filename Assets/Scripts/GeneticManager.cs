@@ -238,9 +238,9 @@ public class GeneticManager : MonoBehaviour
                 
                 
                 Vlad
-                Need to handle deciding when crossover and mutation occurs
+                Need to handle deciding when mutation occurs
                 and for which chromosomes.
-                Use crossoverProb and mutationProb for probabilities
+                Use mutationProb for probabilities
                 Then just need to fill out the chroms array again with the new chromosomes.
 
                 
