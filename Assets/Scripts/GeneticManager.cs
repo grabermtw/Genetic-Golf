@@ -35,7 +35,7 @@ public class GeneticManager : MonoBehaviour
     private TMP_InputField numGensInput;
     [SerializeField]
     private TextMeshProUGUI approxTime;
-    
+
     [SerializeField]
     private GameObject simulationUI; // UI appearing in the top corner while running the simulation
     [SerializeField]
@@ -196,7 +196,7 @@ public class GeneticManager : MonoBehaviour
                 agents[j].GetComponent<GolferBrain>().InitializeAgent(chroms[j], settings, holeDistOffset);
                 agents[j].GetComponent<GolferBrain>().BeginSwinging();
             }
-            
+
             // Allow this generation to run for the specified time.
             // Execution of this code pauses here until time is up, then automatically resumes.
             yield return new WaitForSeconds(timePerGen);
@@ -211,18 +211,18 @@ public class GeneticManager : MonoBehaviour
 
             /* ---------- TODO: HANDLE CHROMOSOMES ----------
 
-                
+
                 This is where we should do the crossover/mutation stuff.
                 Need to fill out Crossover() and Mutate() methods.
-                
+
                 ***TASK FOR SOMEONE TO DO***
                 Need to handle deciding when crossover and mutation occurs
                 and for which chromosomes.
                 Use crossoverProb and mutationProb for probabilities
                 Then just need to fill out the chroms array again with the new chromosomes.
 
-                
-                
+
+
                 ***TASK FOR SOMEONE TO DO***
                 Also, we should keep track of fitnessess across generations so that we can
                 call ExportCSV() at the end.
@@ -230,12 +230,12 @@ public class GeneticManager : MonoBehaviour
                 We can just save this in a variable for now, later on we can display
                 this info about it more usefully.
             */
-            
+
 
         }
         yield break;
     }
-    
+
 
     private Chromosome Crossover(Chromosome parentOne, Chromosome parentTwo)
     {
@@ -244,14 +244,33 @@ public class GeneticManager : MonoBehaviour
     }
 
 
+    /*
+      Handles mutating a chromosome passed in by adding a randomly generated value
+      to the torques of the chromosome
+      @author Ernest Essuah Mensah
+    */
     private Chromosome Mutate(Chromosome parent)
     {
-        // TODO - ***TASK FOR SOMEONE TO DO***
-        return null;
+        // Copy torques from parent to mutate
+        Vector3[] torques = new Vector3[parent.torques.Length];
+
+        for (int i = 0; i < parent.torques.Length; i++) {
+
+          Vector3 current = parent.torques[i];
+
+          // Mutate along the three coordinates
+          float mutationX = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+          float mutationY = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+          float mutationZ = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+
+          torques[i] = new Vector3(current.x + mutationX, current.y + mutationY, current.z + mutationZ);
+        }
+
+        return new Chromosome(torques);
     }
 
 
-    
+
     public void ExportCSV()
     {
         // TODO - ***TASK FOR SOMEONE TO DO***
@@ -263,6 +282,3 @@ public class GeneticManager : MonoBehaviour
     }
 
 }
-
-
-
