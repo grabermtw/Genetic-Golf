@@ -55,6 +55,10 @@ public class GeneticManager : MonoBehaviour
     private Chromosome[] chroms;
     private GameObject[] agents;
     private float[] fitnesses;
+    
+    private Chromosome bestChrom; 
+    private float bestFitness;
+    private float [,] fitnessTrack;
     private GolferSettings settings;
 
     private const float INIT_TORQUE_MAG = 500; // highest possible magnitude a torque component can have initially
@@ -160,6 +164,7 @@ public class GeneticManager : MonoBehaviour
         chroms = new Chromosome[numAgents];
         agents = new GameObject[numAgents];
         fitnesses = new float[numAgents];
+        fitnessTrack = new float[numAgents, numGens]; // 2D array with fitness for each gen
 
         // determine the number of joints based on whether we're using the golfer's full body or not
         int numJoints = (moveableJoints == GolferSettings.MoveableJointsExtent.fullBody ? 12 : 8);
@@ -207,6 +212,27 @@ public class GeneticManager : MonoBehaviour
                 fitnesses[j] = agents[j].GetComponent<GolferBrain>().GetFitness();
                 Destroy(agents[j]);
             }
+            
+            // Track fitness
+            // Initialize best chrom & fit as the first one
+            if (i == 0) {
+                bestChrom = chroms[0];
+                bestFitness = fitnesses[0];
+            }
+
+            // Add fitnesses to 2d fitnessTrack array
+            // Assign new best chrom if there is one
+            for (int j = 0; j < agents.Length; j++)
+            {   
+                fitnessTrack[j,i] = fitnesses[j]; 
+
+                if (fitnessTrack[j,i] > bestFitness) { 
+                    bestFitness = fitnessTrack[j,i];
+                    bestChrom = chroms[j];
+                    Debug.LogWarning("Best Fitness: " + bestFitness);
+                }
+            }  
+
 
 
             //Crossover selection
