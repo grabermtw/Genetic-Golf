@@ -229,7 +229,6 @@ public class GeneticManager : MonoBehaviour
                 if (fitnessTrack[j,i] > bestFitness) { 
                     bestFitness = fitnessTrack[j,i];
                     bestChrom = chroms[j];
-                    Debug.LogWarning("Best Fitness: " + bestFitness);
                 }
             }  
 
