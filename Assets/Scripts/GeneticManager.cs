@@ -255,6 +255,15 @@ public class GeneticManager : MonoBehaviour
                 Crossover(chroms[par1idx], chroms[par2idx]);
             }
 
+            //Vladislav Dozorov
+            //Handle when mutation occurs
+            int candmidx = Random.Range(0, numAgents);
+            
+            float mutationValue = Random.Range(0.0f, 1.0f);
+            if(mutationValue < mutationProb) {
+                Mutate(chroms[candmidx]);
+            }
+            
             /* ---------- TODO: HANDLE CHROMOSOMES ----------
 
 
