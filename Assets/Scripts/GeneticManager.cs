@@ -291,14 +291,14 @@ public class GeneticManager : MonoBehaviour
     {
         int torqueLength = parentOne.torques.Length;
         int crossPoint = Random.Range(1,torqueLength);
-        Debug.Log("Before: " + parentOne.torques + ", " + parentTwo.torques);
+        //Debug.Log("Before: " + parentOne.torques + ", " + parentTwo.torques);
         //Debug.Log("Cross point: " + crossPoint);
         for(int i = crossPoint; i < torqueLength; i++){
             Vector3 temp = parentOne.torques[i];
             parentOne.torques[i] = parentTwo.torques[i];
             parentTwo.torques[i] = temp;
         }
-        Debug.Log("After: " + parentOne.torques + ", " + parentTwo.torques + "\n");
+        //Debug.Log("After: " + parentOne.torques + ", " + parentTwo.torques + "\n");
     }
 
 
