@@ -315,28 +315,18 @@ public class ComplexGeneticManager : MonoBehaviour
         yield break;
     }
 
-    /*  perform uniform crossover
-        https://www.tutorialspoint.com/genetic_algorithms/genetic_algorithms_crossover.htm
-    */
+
     private Tuple<ComplexChromosome, ComplexChromosome> Crossover(ComplexChromosome parentOne, ComplexChromosome parentTwo)
     {
-        int crossPoint = Random.Range(1, parentOne.jointMovements.Length);
-        Tuple<float, Vector3>[][] childOneMovements = new Tuple<float, Vector3>[parentOne.jointMovements.Length][];
-        Tuple<float, Vector3>[][] childTwoMovements = new Tuple<float, Vector3>[parentTwo.jointMovements.Length][];
-        for (int i = 0; i < parentOne.jointMovements.Length; i++)
-        {
-            if (Random.Range(0f, 1f) > 0.5f)
-            {   // don't crossover
-                childOneMovements[i] = parentOne.jointMovements[i];
-                childTwoMovements[i] = parentTwo.jointMovements[i];
-            }
-            else
-            {   // crossover
-                childOneMovements[i] = parentTwo.jointMovements[i];
-                childTwoMovements[i] = parentOne.jointMovements[i];
-            }
+        int jointsLength = parentOne.jointMovements.Length;
+        int crossPoint = Random.Range(1,jointsLength);
+        for(int i = crossPoint; i < jointsLength; i++){
+            Tuple<float, Vector3>[] temp = parentOne.jointMovements[i];
+            parentOne.jointMovements[i] = parentTwo.jointMovements[i];
+            parentTwo.jointMovements[i] = temp;
         }
-        return new Tuple<ComplexChromosome, ComplexChromosome>(new ComplexChromosome(childOneMovements), new ComplexChromosome(childTwoMovements));
+
+        return new Tuple<ComplexChromosome, ComplexChromosome>(parentOne, parentTwo);
     }
 
 
