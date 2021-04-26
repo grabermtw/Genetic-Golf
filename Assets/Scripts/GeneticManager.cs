@@ -11,6 +11,8 @@ public class GeneticManager : MonoBehaviour
 {
     [SerializeField]
     private GameObject agentPrefab;
+    [SerializeField]
+    private GameObject completionText;
 
     // References to menu input stuff
     [SerializeField]
@@ -36,12 +38,15 @@ public class GeneticManager : MonoBehaviour
     [SerializeField]
     private TMP_InputField numGensInput;
     [SerializeField]
+    private TMP_InputField elitismInput;
+    [SerializeField]
     private TextMeshProUGUI approxTime;
 
     [SerializeField]
     private GameObject simulationUI; // UI appearing in the top corner while running the simulation
     [SerializeField]
     private TextMeshProUGUI currentGenText; // displays the current generation number
+    
 
     private GolferSettings.Fitness fitnessFunc;
     private GolferSettings.MoveableJointsExtent moveableJoints;
@@ -53,7 +58,8 @@ public class GeneticManager : MonoBehaviour
     private float crossoverProb;
     private float mutationProb;
     private int numGens;
-
+    private int numElites; // how many of the most fit individuals should be preserved.
+                                    // please keep this to an even number
     private Chromosome[] chroms;
     private GameObject[] agents;
     private float[] fitnesses;
@@ -65,6 +71,7 @@ public class GeneticManager : MonoBehaviour
 
     private const float INIT_TORQUE_MAG = 500; // highest possible magnitude a torque component can have initially
     private const float DIST_BETWEEN_AGENTS = 5; // distance between active agents
+     private const int NUM_SWINGS_PER_GEN = 3; // how many swings each agent should try in each generation
 
     // Called before the first frame update
     void Start()
@@ -81,7 +88,7 @@ public class GeneticManager : MonoBehaviour
         {
             timePerGen = float.Parse(timePerGenInput.text);
             numGens = int.Parse(numGensInput.text);
-            float totalSeconds = numGens * timePerGen;
+            float totalSeconds = numGens * timePerGen * NUM_SWINGS_PER_GEN;
             int hours = TimeSpan.FromSeconds(totalSeconds).Hours;
             int minutes = TimeSpan.FromSeconds(totalSeconds).Minutes;
             int seconds = TimeSpan.FromSeconds(totalSeconds).Seconds;
@@ -190,31 +197,44 @@ public class GeneticManager : MonoBehaviour
         for (int i = 0; i < numGens; i++)
         {
             // display the current generation number
-            currentGenText.text = "" + (i + 1);
+            currentGenText.text = "" + (i + 1) + " / " + numGens;
 
             // Determine the random hole distance offset for this generation
             // (if holeDistRand == 0 then it will just be 0)
             holeDistOffset = Random.Range(-holeDistRand, holeDistRand);
 
-            // Instantiate new agents, give them their respective chromosomes, tell them to start swinging their clubs
-            for (int j = 0; j < agents.Length; j++)
+            // have each agent do several swings and average the fitnesses of those swings
+            // clear out fitnesses array
+            fitnesses = new float[numAgents];
+            for (int swingNum = 0; swingNum < NUM_SWINGS_PER_GEN; swingNum++)
             {
-                agents[j] = Instantiate(agentPrefab, new Vector3(0, 0, - j * DIST_BETWEEN_AGENTS), Quaternion.identity);
-                agents[j].GetComponent<GolferBrain>().InitializeAgent(chroms[j], settings, holeDistOffset);
-                agents[j].GetComponent<GolferBrain>().BeginSwinging();
+
+                // Instantiate new agents, give them their respective chromosomes, tell them to start swinging their clubs
+                for (int j = 0; j < agents.Length; j++)
+                {
+                    agents[j] = Instantiate(agentPrefab, new Vector3(0, 0, - j * DIST_BETWEEN_AGENTS), Quaternion.identity);
+                    agents[j].GetComponent<GolferBrain>().InitializeAgent(chroms[j], settings, holeDistOffset);
+                    agents[j].GetComponent<GolferBrain>().BeginSwinging();
+                }
+
+                // Allow this generation to run for the specified time.
+                // Execution of this code pauses here until time is up, then automatically resumes.
+                yield return new WaitForSeconds(timePerGen);
+
+                // Get the fitnesses of the agents and then clear them out
+                for (int j = 0; j < agents.Length; j++)
+                {
+                    fitnesses[j] = agents[j].GetComponent<GolferBrain>().GetFitness();
+                    Destroy(agents[j]);
+                }
             }
 
-            // Allow this generation to run for the specified time.
-            // Execution of this code pauses here until time is up, then automatically resumes.
-            yield return new WaitForSeconds(timePerGen);
-
-            // Get the fitnesses of the agents and then clear them out
-            for (int j = 0; j < agents.Length; j++)
+            // complete the calculation of the average fitnesses over those three swings for the gen
+            for (int j = 0; j < fitnesses.Length; j++)
             {
-                fitnesses[j] = agents[j].GetComponent<GolferBrain>().GetFitness();
-                Destroy(agents[j]);
+                fitnesses[j] = fitnesses[j] / NUM_SWINGS_PER_GEN;
             }
-            
+
             // Track fitness
             // Initialize best chrom & fit as the first one
             if (i == 0) {
@@ -234,63 +254,70 @@ public class GeneticManager : MonoBehaviour
                 }
             }  
 
+            // create new chromosome array
+            Chromosome[] newChroms = new Chromosome[chroms.Length];
 
-
-            //Crossover selection
-            //Tournament selection with 2 candidates for each parent
-            int par1idx = Random.Range(0, numAgents);
-            int par2idx = par1idx;
-            while(par2idx == par1idx){
-                par2idx = Random.Range(0, numAgents);
+            /* find most fit individuals
+                by sorting the fitnesses array in descending order,
+                then taking the first however many biggest fitnesses
+                and putting their respective chromosomes in the new chromosome array
+                */
+            float[] sortedFitnesses = fitnesses;
+            Array.Sort(sortedFitnesses);
+            Array.Reverse(sortedFitnesses);
+            for (int j = 0; j < numElites; j++)
+            {
+                try {
+                    newChroms[i] = chroms[Array.FindIndex(fitnesses, x => x == sortedFitnesses[j])];
+                }
+                catch {
+                    Debug.LogWarning("something weird happened");
+                }
             }
-            
-            float crossValue = Random.Range(0.0f, 1.0f);
-            if(crossValue < crossoverProb){
-                Crossover(chroms[par1idx], chroms[par2idx]);
+
+            // Andrew DeBiase
+            // Crossover selection
+            for (int pair = numElites; pair < chroms.Length; pair += 2)
+            {
+                //Tournament selection with 2 candidates for each parent
+                int par1idx = Random.Range(0, numAgents);
+                int par2idx = par1idx;
+                while(par2idx == par1idx){
+                    par2idx = Random.Range(0, numAgents);
+                }
+                
+                // determine if we crossover
+                float crossValue = Random.Range(0.0f, 1.0f);
+                if (crossValue < crossoverProb){
+                    // crossover
+                    Tuple<Chromosome, Chromosome> xresult = Crossover(chroms[par1idx], chroms[par2idx]);
+                    newChroms[pair] = xresult.Item1;
+                    newChroms[pair + 1] = xresult.Item2;
+                }
+                else
+                {   // don't crossover, just send the parents on to the new array
+                    newChroms[pair] = chroms[par1idx];
+                    newChroms[pair + 1] = chroms[par2idx];
+                }
             }
 
             //Vladislav Dozorov
             //Handle when mutation occurs
-            int candmidx = Random.Range(0, numAgents);
-            
-            float mutationValue = Random.Range(0.0f, 1.0f);
-            if(mutationValue < mutationProb) {
-                Mutate(chroms[candmidx]);
+            for (int candmidx = numElites; candmidx < newChroms.Length; candmidx++)
+            {                
+                float mutationValue = Random.Range(0.0f, 1.0f);
+                if(mutationValue <= mutationProb) {
+                    newChroms[candmidx] = Mutate(newChroms[candmidx]);
+                }
             }
-            
-            /* ---------- TODO: HANDLE CHROMOSOMES ----------
-
-
-                This is where we should do the crossover/mutation stuff.
-                Need to fill out Crossover() and Mutate() methods.
-
-
-                Vlad
-                Need to handle deciding when mutation occurs
-                and for which chromosomes.
-                Use mutationProb for probabilities
-                Then just need to fill out the chroms array again with the new chromosomes.
-
-
-
-
-
-                Azhdaha
-                Also, we should keep track of fitnessess across generations so that we can
-                call ExportCSV() at the end.
-                We should also keep track of the most fit chromosome.
-                We can just save this in a variable for now, later on we can display
-                this info about it more usefully.
-            */
-
-
         }
+        completionText.SetActive(true);
         ExportCSV();
         yield break;
     }
 
     /* @author Andrew DeBiase */
-    private void Crossover(Chromosome parentOne, Chromosome parentTwo)
+    private Tuple<Chromosome, Chromosome> Crossover(Chromosome parentOne, Chromosome parentTwo)
     {
         int torqueLength = parentOne.torques.Length;
         int crossPoint = Random.Range(1,torqueLength);
@@ -302,6 +329,7 @@ public class GeneticManager : MonoBehaviour
             parentTwo.torques[i] = temp;
         }
         //Debug.Log("After: " + parentOne.torques + ", " + parentTwo.torques + "\n");
+        return new Tuple<Chromosome, Chromosome>(parentOne, parentTwo);
     }
 
 
@@ -314,7 +342,7 @@ public class GeneticManager : MonoBehaviour
     {
         // Copy torques from parent to mutate
         Vector3[] torques = new Vector3[parent.torques.Length];
-
+        
         for (int i = 0; i < parent.torques.Length; i++) {
 
           Vector3 current = parent.torques[i];
@@ -334,7 +362,22 @@ public class GeneticManager : MonoBehaviour
     /* @author John Gansallo */
     public void ExportCSV()
     {
-	    string path = Application.dataPath + @"/" + "fitness.csv";
+        string filename = "chrom-basic";
+        filename += "_numGens-" + numGens;
+        filename += "_fitness-" + (fitnessFunc == GolferSettings.Fitness.accuracy ? "accuracy" : "distance");
+        filename += "_jointsExtent-" + (moveableJoints == GolferSettings.MoveableJointsExtent.armsTorso ? "upperBody" : "fullBody");
+        filename += "_grip-" + (clubGrip == GolferSettings.ClubGrip.oneHand ? "1hand" : "2hand");
+        filename += "_numAgents-" + numAgents;
+        if (fitnessFunc == GolferSettings.Fitness.accuracy)
+        {
+            filename += "_holeDist-" + holeDist;
+            filename += "_holeRandOffset-" + holeDistRand;
+        }
+        filename += "_genTime-" + timePerGen;
+        filename += "_pc-" + crossoverProb;
+        filename += "_mc-" + mutationProb;
+        filename += "_elitism-" + numElites;
+	    string path = Application.dataPath + @"/" + filename + ".csv";
         if (!File.Exists(path))
         {
             // Create a file to write to.
