@@ -337,6 +337,50 @@ public class GeneticManager : MonoBehaviour
             either at the beginning or the end, such as the fields in GolfSettings
             as well as the timePerGen, mutationProb, crossoverProb, holeDist, holeDistRand etc.
         */
+        string path = @"Application.dataPath + "/" + "fitness.csv";
+        if (!File.Exists(path))
+        {
+            // Create a file to write to.
+            using (StreamWriter gen = File.CreateText(path))
+            {
+                gen.WriteLine("Best Fitness");
+                gen.WriteLine("Average Fitness");
+		        gen.WriteLine("Generation #");
+            }	
+        }
+
+        // Open the file to read from.
+        using (StreamReader sr = File.OpenText(path))
+        {
+            string golfers = "";
+            while ((golfers = sr.ReadLine()) != null)
+            {
+                Console.WriteLine(golfers);
+            }
+        }
     }
+    
+   /* static void Main(string[] args) 
+        {
+            addrecord("Best Fitness", "Average Fitness", "Generation #", + Application.dataPath + "/" + "fitness.csv");
+        }
+
+    public static void addRecord(string bestFitness, string avgFitness, string genNumber, string filepath) {
+
+    try 
+    {
+        using (System.IO.Streamwriter file = new System.IO.Streamwriter (@filepath, true) 
+        {
+            file.WriteLine(bestFitness + "," + avgFitness + "," + genNumber);
+	    }
+    }
+
+    catch(Exception ex) 
+    {
+        throw new ApplicationException(This program did not pass:", ex);
+    }
+
+  } */
+    
 
 }
