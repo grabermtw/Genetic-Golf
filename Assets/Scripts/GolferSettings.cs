@@ -8,14 +8,14 @@ public readonly struct GolferSettings
 
     public enum MoveableJointsExtent
     {
-        fullBody,
-        armsTorso
+        armsTorso,
+        fullBody
     }
 
     public enum ClubGrip
     {
-        oneHand,
-        twoHands
+        twoHands,
+        oneHand        
     }
 
     public Fitness fitnessFunc { get; }
