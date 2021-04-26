@@ -330,12 +330,21 @@ public class GeneticManager2 : MonoBehaviour
         {
             Tuple<float, Vector3> current = parent.jointMovements[mutationIndex][i];
 
-            // Mutate along the three coordinates
-            float mutationX = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-            float mutationY = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-            float mutationZ = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-            
-            Vector3 newMovement = new Vector3(current.Item2.x + mutationX, current.Item2.y + mutationY, current.Item2.z + mutationZ);
+            // Pick a random axis to mutate
+	    // 0: x-axis; 1: y-axis, 2: z-axis
+	    int mutationAxis = Random.Range(0,2);
+	    float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+	    Vector3 newMovement;
+	    
+	    if (mutationAxis == 0) {
+	    	newMovement = new Vector3(current.Item2.x + mutation, current.Item2.y, current.Item2.z);
+		
+	    } else if (mutationAxis == 1) {
+	    	newMovement = new Vector3(current.Item2.x, current.Item2.y + mutation, current.Item2.z);
+	   
+	    } else {
+	    	newMovement = new Vector3(current.Item2.x, current.Item2.y, current.Item2.z + mutation);
+	    }
 
             // Mutate the time between joint movements
             float mutationTime = Random.Range(-MAX_TIME_BETWEEN_TORQUES, MAX_TIME_BETWEEN_TORQUES);
