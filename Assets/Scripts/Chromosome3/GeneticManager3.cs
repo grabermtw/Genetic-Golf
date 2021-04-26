@@ -337,14 +337,15 @@ public class GeneticManager3 : MonoBehaviour
 	    float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
 	    Vector3 newMovement;
 	    
-	    if (mutationAxis == 0)
+	    if (mutationAxis == 0) {
 	    	newMovement = new Vector3(current.Item2.x + mutation, current.Item2.y, current.Item2.z);
 		
-	    else if (mutationAxis == 1)
+	    } else if (mutationAxis == 1) {
 	    	newMovement = new Vector3(current.Item2.x, current.Item2.y + mutation, current.Item2.z);
 	   
-	    else
-	    	newMovement = new Vector3(current.Item2, current.Item2.y, current.Item2.z + mutation);
+	    } else {
+	    	newMovement = new Vector3(current.Item2.x, current.Item2.y, current.Item2.z + mutation);
+	    }
 
             // Mutate the time between joint movements and the time that the torque is applied for
             float mutationWaitTime = Random.Range(-MAX_TIME_BETWEEN_TORQUES, MAX_TIME_BETWEEN_TORQUES);
