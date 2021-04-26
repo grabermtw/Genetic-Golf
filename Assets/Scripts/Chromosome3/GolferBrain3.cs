@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ComplexGolferBrain : MonoBehaviour
+public class GolferBrain3 : MonoBehaviour
 {
     [SerializeField]
     private Rigidbody[] joints; // Think of these as muscles
@@ -19,16 +19,18 @@ public class ComplexGolferBrain : MonoBehaviour
     [SerializeField]
     private Transform hole;
     [SerializeField]
+    private Transform tee;
+    [SerializeField]
     private bool useGravity;
 
-    private ComplexChromosome chrom;
+    private Chromosome3 chrom;
     private GolferSettings settings;
     private Rigidbody[] jointsInUse; // the joints that are actually being used in this sim (may or may not be full body)
-    private float actualHoleDist;
+    private float actualHoleDist = 1;
     
 
     // This should be called right after the golfer is instantiated
-    public void InitializeAgent(ComplexChromosome newChrom, GolferSettings newSettings, float holeDistOffset = 0)
+    public void InitializeAgent(Chromosome3 newChrom, GolferSettings newSettings, float holeDistOffset = 0)
     {
         chrom = newChrom;
         jointsInUse = new Rigidbody[chrom.jointMovements.Length];
@@ -90,8 +92,15 @@ public class ComplexGolferBrain : MonoBehaviour
         {
             // wait for the specified time
             yield return new WaitForSeconds(chrom.jointMovements[jointIndex][i].Item1);
-            // apply the torque as an instantaneous impulse
-            jointsInUse[jointIndex].AddRelativeTorque(chrom.jointMovements[jointIndex][i].Item2 * actualHoleDist, ForceMode.Impulse);
+            // apply the torque for the duration specified by the chromosome
+            float timeRemaining = chrom.jointMovements[jointIndex][i].Item3;
+            while (timeRemaining > 0)
+            {
+                // wait for physics update
+                yield return new WaitForFixedUpdate();
+                jointsInUse[jointIndex].AddRelativeTorque(chrom.jointMovements[jointIndex][i].Item2 * actualHoleDist * Time.fixedDeltaTime);
+                timeRemaining -= Time.fixedDeltaTime;
+            }
         }
     }
 
@@ -104,10 +113,11 @@ public class ComplexGolferBrain : MonoBehaviour
         {
             case GolferSettings.Fitness.drivingDist:
                 // Calculate fitness based on total distance ball has traveled in agent's direction
-                float ballDist = Vector3.Distance(golfBall.position, transform.position);
-                Vector3 ballDir = golfBall.position - transform.position;
-                float ballAngle = Vector3.Angle(ballDir, -transform.right);
+                float ballDist = Vector3.Distance(golfBall.position, tee.position);
+                Vector3 ballDir = golfBall.position - tee.position;
+                float ballAngle = Vector3.Angle(ballDir, -tee.right);
                 fitness = ballDist * Mathf.Cos(ballAngle);
+                Debug.Log("position: " + golfBall.position + "fitness: " + fitness);
                 break;
             case GolferSettings.Fitness.accuracy:
                 // Calculate fitness based on accuracy of hitting it toward the hole

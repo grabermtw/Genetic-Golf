@@ -33,6 +33,7 @@ MonoBehaviour:
   - {fileID: 7794503755349345950}
   golfBall: {fileID: 6983616341368653041}
   hole: {fileID: 6983616340497517429}
+  tee: {fileID: 3570791931999965070}
   useGravity: 1
 --- !u!1001 &1369898393849388887
 PrefabInstance:
@@ -209,6 +210,12 @@ GameObject:
 --- !u!1 &7794503755349345950 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9162987453476149705, guid: abe14088d35717d4b91161530bc50068,
+    type: 3}
+  m_PrefabInstance: {fileID: 1369898393849388887}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3570791931999965070 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2489605500605632729, guid: abe14088d35717d4b91161530bc50068,
     type: 3}
   m_PrefabInstance: {fileID: 1369898393849388887}
   m_PrefabAsset: {fileID: 0}

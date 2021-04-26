@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GolferBrain : MonoBehaviour
+public class GolferBrain2 : MonoBehaviour
 {
     [SerializeField]
     private Rigidbody[] joints; // Think of these as muscles
@@ -23,18 +23,17 @@ public class GolferBrain : MonoBehaviour
     [SerializeField]
     private bool useGravity;
 
-    private Chromosome chrom;
+    private Chromosome2 chrom;
     private GolferSettings settings;
     private Rigidbody[] jointsInUse; // the joints that are actually being used in this sim (may or may not be full body)
-    private bool swinging;
     private float actualHoleDist = 1;
     
 
     // This should be called right after the golfer is instantiated
-    public void InitializeAgent(Chromosome newChrom, GolferSettings newSettings, float holeDistOffset = 0)
+    public void InitializeAgent(Chromosome2 newChrom, GolferSettings newSettings, float holeDistOffset = 0)
     {
         chrom = newChrom;
-        jointsInUse = new Rigidbody[chrom.torques.Length];
+        jointsInUse = new Rigidbody[chrom.jointMovements.Length];
         settings = newSettings;
         // hide the golf hole if we don't need it
         if (settings.fitnessFunc == GolferSettings.Fitness.drivingDist)
@@ -73,35 +72,28 @@ public class GolferBrain : MonoBehaviour
                     jointsInUse[jointIndex++] = joint;
             }
         }
-        StartCoroutine(MoveJoints());
-    }
 
-    // Call this to interrupt the MoveJoints coroutine
-    public void StopSwinging()
-    {
-        swinging = false;
-    }
-
-    // This coroutine adds torque to each joint.
-    /*  could change this later if we have a more complex chromosome
-        with multiple torques per joint */
-    private IEnumerator MoveJoints()
-    {
-        swinging = true;
-        while (swinging)
+        // start the joint-moving coroutine for each joint
+        for (int i = 0; i < chrom.jointMovements.Length; i++)
         {
-            for (int i = 0; i < jointsInUse.Length; i++)
-            {
-                // multiplying by Time.fixedDeltaTime keeps it framerate-independent
-                /*  consider multiplying by the distance to the hole to
-                    explore if that makes the agent better able to hit holes at different
-                    distances */
-                // no consideration of distance to hole
-                // joints[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime); 
-                // consideration of distance to hole (see if this helps when hole position is randomized)
-                jointsInUse[i].AddRelativeTorque(chrom.torques[i] * Time.fixedDeltaTime * actualHoleDist);
-            }
-            yield return new WaitForFixedUpdate();
+            StartCoroutine(MoveJoint(i));
+        }
+        
+    }
+
+    // This coroutine adds the torques to the joint, separated by the specified times.
+    private IEnumerator MoveJoint(int jointIndex)
+    {
+        /*  consider multiplying by the distance to the hole to
+            explore if that makes the agent better able to hit holes at different
+            distances */
+        // consideration of distance to hole (see if this helps when hole position is randomized)
+        for (int i = 0; i < chrom.jointMovements[jointIndex].Length; i++)
+        {
+            // wait for the specified time
+            yield return new WaitForSeconds(chrom.jointMovements[jointIndex][i].Item1);
+            // apply the torque as an instantaneous impulse
+            jointsInUse[jointIndex].AddRelativeTorque(chrom.jointMovements[jointIndex][i].Item2 * actualHoleDist, ForceMode.Impulse);
         }
     }
 
