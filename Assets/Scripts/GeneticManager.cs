@@ -337,7 +337,8 @@ public class GeneticManager : MonoBehaviour
             either at the beginning or the end, such as the fields in GolfSettings
             as well as the timePerGen, mutationProb, crossoverProb, holeDist, holeDistRand etc.
         */
-        string path = @"Application.dataPath + "/" + "fitness.csv";
+	
+	string path = Application.dataPath + @"/" + "fitness.csv";
         if (!File.Exists(path))
         {
             // Create a file to write to.
