@@ -7,7 +7,7 @@ using UnityEngine;
 using TMPro;
 using Random = UnityEngine.Random;
 
-public class ComplexGeneticManager : MonoBehaviour
+public class GeneticManager2 : MonoBehaviour
 {
     [SerializeField]
     private GameObject agentPrefab;
@@ -61,20 +61,21 @@ public class ComplexGeneticManager : MonoBehaviour
     private int numElites; // how many of the most fit individuals should be preserved.
                                     // please keep this to an even number
 
-    private ComplexChromosome[] chroms;
+    private Chromosome2[] chroms;
     private GameObject[] agents;
     private float[] fitnesses;
     
-    private ComplexChromosome bestChrom; 
+    private Chromosome2 bestChrom; 
     private float bestFitness;
     private float [,] fitnessTrack;
     private GolferSettings settings;
 
     private const float INIT_TORQUE_MAG = 1000; // highest possible magnitude a torque component can have initially
     private const float DIST_BETWEEN_AGENTS = 5; // distance between active agents
-    private const int COMPLEX_CHROMOSOME_LENGTH = 30; // length of each array in the ComplexChromosome structure
+    private const int COMPLEX_CHROMOSOME_LENGTH = 40; // length of each array in the Chromosome2 structure
     private const float MAX_TIME_BETWEEN_TORQUES = 1.5f; // maximum time between two torques
     private const int NUM_SWINGS_PER_GEN = 3; // how many swings each agent should try in each generation
+    private const float PARALLEL_POSITION_OFFSET = 25; // how far off from the origin are these people swinging
 
 
     // Called when the user clicks the "Begin Simulation" button
@@ -139,10 +140,10 @@ public class ComplexGeneticManager : MonoBehaviour
         float holeDistOffset;
 
         // Initialize arrays
-        chroms = new ComplexChromosome[numAgents];
+        chroms = new Chromosome2[numAgents];
         agents = new GameObject[numAgents];
         fitnesses = new float[numAgents];
-        fitnessTrack = new float[numAgents, numGens]; // 2D array with fitness for each gen
+        fitnessTrack = new float[numGens, numAgents]; // 2D array with fitness for each gen
 
         // determine the number of joints based on whether we're using the golfer's full body or not
         int numJoints = (moveableJoints == GolferSettings.MoveableJointsExtent.fullBody ? 12 : 8);
@@ -163,7 +164,7 @@ public class ComplexGeneticManager : MonoBehaviour
                                                                                      Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG)));
                 }
             }
-            chroms[i] = new ComplexChromosome(initJointMovements);
+            chroms[i] = new Chromosome2(initJointMovements);
         }
 
         // ----------- RUN THE SIMULATION ------------
@@ -186,9 +187,9 @@ public class ComplexGeneticManager : MonoBehaviour
                 // Instantiate new agents, give them their respective chromosomes, tell them to start swinging their clubs
                 for (int j = 0; j < agents.Length; j++)
                 {
-                    agents[j] = Instantiate(agentPrefab, new Vector3(0, 0, - j * DIST_BETWEEN_AGENTS), Quaternion.identity);
-                    agents[j].GetComponent<ComplexGolferBrain>().InitializeAgent(chroms[j], settings, holeDistOffset);
-                    agents[j].GetComponent<ComplexGolferBrain>().BeginSwinging();
+                    agents[j] = Instantiate(agentPrefab, new Vector3(PARALLEL_POSITION_OFFSET, 0, - j * DIST_BETWEEN_AGENTS), Quaternion.identity);
+                    agents[j].GetComponent<GolferBrain2>().InitializeAgent(chroms[j], settings, holeDistOffset);
+                    agents[j].GetComponent<GolferBrain2>().BeginSwinging();
                 }
 
                 // Allow this generation to run for the specified time.
@@ -198,7 +199,7 @@ public class ComplexGeneticManager : MonoBehaviour
                 // Get the fitnesses of the agents and then clear them out
                 for (int j = 0; j < agents.Length; j++)
                 {
-                    fitnesses[j] += agents[j].GetComponent<ComplexGolferBrain>().GetFitness();
+                    fitnesses[j] += agents[j].GetComponent<GolferBrain2>().GetFitness();
                     Destroy(agents[j]);
                 }
             }
@@ -228,7 +229,7 @@ public class ComplexGeneticManager : MonoBehaviour
             }
 
             // create new chromosome array
-            ComplexChromosome[] newChroms = new ComplexChromosome[chroms.Length];
+            Chromosome2[] newChroms = new Chromosome2[chroms.Length];
 
             /* find most fit individuals
                 by sorting the fitnesses array in descending order,
@@ -253,17 +254,26 @@ public class ComplexGeneticManager : MonoBehaviour
             for (int pair = numElites; pair < chroms.Length; pair += 2)
             {
                 //Tournament selection with 2 candidates for each parent
-                int par1idx = Random.Range(0, numAgents);
-                int par2idx = par1idx;
-                while(par2idx == par1idx){
-                    par2idx = Random.Range(0, numAgents);
+                // first parent:
+                int cand1idx = Random.Range(0, numAgents);
+                int cand2idx = Random.Range(0, numAgents);
+                while(cand1idx == cand2idx){
+                    cand2idx = Random.Range(0, numAgents);
                 }
+                int par1idx = (fitnesses[cand1idx] > fitnesses[cand2idx] ? cand1idx : cand2idx);
+                // second parent
+                cand1idx = Random.Range(0, numAgents);
+                cand2idx = Random.Range(0, numAgents);
+                while(cand1idx == cand2idx){
+                    cand2idx = Random.Range(0, numAgents);
+                }
+                int par2idx = (fitnesses[cand1idx] > fitnesses[cand2idx] ? cand1idx : cand2idx);
 
                 // determine if we crossover
                 float crossValue = Random.Range(0.0f, 1.0f);
                 if (crossValue < crossoverProb){
                     // crossover
-                    Tuple<ComplexChromosome, ComplexChromosome> xresult = Crossover(chroms[par1idx], chroms[par2idx]);
+                    Tuple<Chromosome2, Chromosome2> xresult = Crossover(chroms[par1idx], chroms[par2idx]);
                     newChroms[pair] = xresult.Item1;
                     newChroms[pair + 1] = xresult.Item2;
                 }
@@ -290,7 +300,7 @@ public class ComplexGeneticManager : MonoBehaviour
     }
 
     /* @author Andrew DeBiase */
-    private Tuple<ComplexChromosome, ComplexChromosome> Crossover(ComplexChromosome parentOne, ComplexChromosome parentTwo)
+    private Tuple<Chromosome2, Chromosome2> Crossover(Chromosome2 parentOne, Chromosome2 parentTwo)
     {
         int jointsLength = parentOne.jointMovements.Length;
         int crossPoint = Random.Range(1,jointsLength);
@@ -300,7 +310,7 @@ public class ComplexGeneticManager : MonoBehaviour
             parentTwo.jointMovements[i] = temp;
         }
 
-        return new Tuple<ComplexChromosome, ComplexChromosome>(parentOne, parentTwo);
+        return new Tuple<Chromosome2, Chromosome2>(parentOne, parentTwo);
     }
 
 
@@ -309,34 +319,33 @@ public class ComplexGeneticManager : MonoBehaviour
       to the torques of the chromosome
       @author Ernest Essuah Mensah
     */
-    private ComplexChromosome Mutate(ComplexChromosome parent)
+    private Chromosome2 Mutate(Chromosome2 parent)
     {
         // Copy torques from parent to mutate
         Tuple<float, Vector3>[][] jointMovements = parent.jointMovements;
 
-        // int mutationIndex = Random.Range(0, parent.jointMovements.Length);
-        for (int jointIndex = 0; jointIndex < parent.jointMovements.Length; jointIndex++)
+         int mutationIndex = Random.Range(0, parent.jointMovements.Length);
+        
+        for (int i = 0; i < COMPLEX_CHROMOSOME_LENGTH; i++)
         {
-            for (int i = 0; i < COMPLEX_CHROMOSOME_LENGTH; i++)
-            {
-                Tuple<float, Vector3> current = parent.jointMovements[jointIndex][i];
+            Tuple<float, Vector3> current = parent.jointMovements[mutationIndex][i];
 
-                // Mutate along the three coordinates
-                float mutationX = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-                float mutationY = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-                float mutationZ = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-                
-                Vector3 newMovement = new Vector3(current.Item2.x + mutationX, current.Item2.y + mutationY, current.Item2.z + mutationZ);
+            // Mutate along the three coordinates
+            float mutationX = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+            float mutationY = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+            float mutationZ = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+            
+            Vector3 newMovement = new Vector3(current.Item2.x + mutationX, current.Item2.y + mutationY, current.Item2.z + mutationZ);
 
-                // Mutate the time between joint movements
-                float mutationTime = Random.Range(-MAX_TIME_BETWEEN_TORQUES, MAX_TIME_BETWEEN_TORQUES);
+            // Mutate the time between joint movements
+            float mutationTime = Random.Range(-MAX_TIME_BETWEEN_TORQUES, MAX_TIME_BETWEEN_TORQUES);
 
-                float newTime = Mathf.Max(current.Item1 + mutationTime, 0);
+            float newTime = Mathf.Max(current.Item1 + mutationTime, 0);
 
-                jointMovements[jointIndex][i] = new Tuple<float, Vector3>(newTime, newMovement);
-            }     
-        }
-        return new ComplexChromosome(jointMovements);
+            jointMovements[mutationIndex][i] = new Tuple<float, Vector3>(newTime, newMovement);
+        }     
+        
+        return new Chromosome2(jointMovements);
     }
 
 
@@ -344,8 +353,7 @@ public class ComplexGeneticManager : MonoBehaviour
     /* @author John Gansallo */
     public void ExportCSV()
     {
-	    string filename = "chrom-complex";
-        filename += "_numGens-" + numGens;
+	    string filename = "numGens-" + numGens;
         filename += "_fitness-" + (fitnessFunc == GolferSettings.Fitness.accuracy ? "accuracy" : "distance");
         filename += "_jointsExtent-" + (moveableJoints == GolferSettings.MoveableJointsExtent.armsTorso ? "upperBody" : "fullBody");
         filename += "_grip-" + (clubGrip == GolferSettings.ClubGrip.oneHand ? "1hand" : "2hand");
@@ -359,6 +367,7 @@ public class ComplexGeneticManager : MonoBehaviour
         filename += "_pc-" + crossoverProb;
         filename += "_mc-" + mutationProb;
         filename += "_elitism-" + numElites;
+        filename += "_chrom-2";
 	    string path = Application.dataPath + @"/" + filename + ".csv";
         if (!File.Exists(path))
         {

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public class ComplexChromosome
+public class Chromosome2
 {
     /*  Each element is a list of <float, Vector3> tuples, with
         each list corresponding to a particular joint.
@@ -10,7 +10,7 @@ public class ComplexChromosome
     public Tuple<float, Vector3>[][] jointMovements;
 
     /* Add other fields here later perhaps (golf clubs?) */
-    public ComplexChromosome(Tuple<float, Vector3>[][] jointMovements)
+    public Chromosome2(Tuple<float, Vector3>[][] jointMovements)
     {
         this.jointMovements = jointMovements;
     }
