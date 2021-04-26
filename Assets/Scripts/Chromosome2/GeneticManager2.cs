@@ -295,7 +295,8 @@ public class GeneticManager2 : MonoBehaviour
             }
         }
         completionText.SetActive(true);
-        ExportCSV();
+        // ExportCSV()
+        GetComponent<Exporter>().FinishedSimulation();
         yield break;
     }
 
@@ -348,9 +349,14 @@ public class GeneticManager2 : MonoBehaviour
         return new Chromosome2(jointMovements);
     }
 
+    public float[,] GetResults()
+    {
+        return fitnessTrack;
+    }
 
 
-    /* @author John Gansallo */
+    /* @author John Gansallo
+        Deprecated, see ExportCSV() in Export.cs */
     public void ExportCSV()
     {
 	    string filename = "numGens-" + numGens;
