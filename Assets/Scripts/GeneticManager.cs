@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using TMPro;
 using Random = UnityEngine.Random;
@@ -71,7 +73,7 @@ public class GeneticManager : MonoBehaviour
         CalculateApproximateTime();
     }
 
-    // Calculate approximate expected time to run the simulation.
+    // Calculate approximate expected time to run the simulation for display in UI.
     // This gets called every time the number of generations or time between generations is updated.
     public void CalculateApproximateTime()
     {
@@ -151,7 +153,7 @@ public class GeneticManager : MonoBehaviour
     // --------------- ACTUAL GENETIC ALGORITHM STUFF BELOW ----------------
 
 
-
+    /* @author Matthew Graber, Azhdaha Fayyaz, Andrew DeBiase, Vladislav Dozorov */
     // Here is where the actual simulations are managed
     private IEnumerator Simulate()
     {
@@ -164,7 +166,7 @@ public class GeneticManager : MonoBehaviour
         chroms = new Chromosome[numAgents];
         agents = new GameObject[numAgents];
         fitnesses = new float[numAgents];
-        fitnessTrack = new float[numAgents, numGens]; // 2D array with fitness for each gen
+        fitnessTrack = new float[numGens, numAgents]; // 2D array with fitness for each gen
 
         // determine the number of joints based on whether we're using the golfer's full body or not
         int numJoints = (moveableJoints == GolferSettings.MoveableJointsExtent.fullBody ? 12 : 8);
@@ -224,10 +226,10 @@ public class GeneticManager : MonoBehaviour
             // Assign new best chrom if there is one
             for (int j = 0; j < agents.Length; j++)
             {   
-                fitnessTrack[j,i] = fitnesses[j]; 
+                fitnessTrack[i,j] = fitnesses[j]; 
 
-                if (fitnessTrack[j,i] > bestFitness) { 
-                    bestFitness = fitnessTrack[j,i];
+                if (fitnessTrack[i,j] > bestFitness) { 
+                    bestFitness = fitnessTrack[i,j];
                     bestChrom = chroms[j];
                 }
             }  
@@ -236,25 +238,26 @@ public class GeneticManager : MonoBehaviour
 
             //Crossover selection
             //Tournament selection with 2 candidates for each parent
-            int cand1idx = Random.Range(0, numAgents);
-            int cand2idx = cand1idx;
-            while(cand2idx == cand1idx){
-                cand2idx = Random.Range(0, numAgents);
+            int par1idx = Random.Range(0, numAgents);
+            int par2idx = par1idx;
+            while(par2idx == par1idx){
+                par2idx = Random.Range(0, numAgents);
             }
-            int par1idx;
-            int par2idx;
-            if(fitnesses[cand1idx] > fitnesses[cand2idx]){
-                par1idx = cand1idx;
-                par2idx = cand2idx;
-            } else {
-                par2idx = cand1idx;
-                par1idx = cand2idx;
-            }
+            
             float crossValue = Random.Range(0.0f, 1.0f);
             if(crossValue < crossoverProb){
                 Crossover(chroms[par1idx], chroms[par2idx]);
             }
 
+            //Vladislav Dozorov
+            //Handle when mutation occurs
+            int candmidx = Random.Range(0, numAgents);
+            
+            float mutationValue = Random.Range(0.0f, 1.0f);
+            if(mutationValue < mutationProb) {
+                Mutate(chroms[candmidx]);
+            }
+            
             /* ---------- TODO: HANDLE CHROMOSOMES ----------
 
 
@@ -282,22 +285,23 @@ public class GeneticManager : MonoBehaviour
 
 
         }
+        ExportCSV();
         yield break;
     }
 
-
+    /* @author Andrew DeBiase */
     private void Crossover(Chromosome parentOne, Chromosome parentTwo)
     {
-
-        int crossPoint = Random.Range(1,3);
-        //Debug.Log("Before: " + parentOne.torques[0] + ", " + parentTwo.torques[0]);
+        int torqueLength = parentOne.torques.Length;
+        int crossPoint = Random.Range(1,torqueLength);
+        //Debug.Log("Before: " + parentOne.torques + ", " + parentTwo.torques);
         //Debug.Log("Cross point: " + crossPoint);
-        for(int i = crossPoint; i < 3; i++){
-            float temp = parentOne.torques[0][i];
-            parentOne.torques[0][i] = parentTwo.torques[0][i];
-            parentTwo.torques[0][i] = temp;
+        for(int i = crossPoint; i < torqueLength; i++){
+            Vector3 temp = parentOne.torques[i];
+            parentOne.torques[i] = parentTwo.torques[i];
+            parentTwo.torques[i] = temp;
         }
-        //Debug.Log("Before: " + parentOne.torques[0] + ", " + parentTwo.torques[0]);
+        //Debug.Log("After: " + parentOne.torques + ", " + parentTwo.torques + "\n");
     }
 
 
@@ -327,15 +331,32 @@ public class GeneticManager : MonoBehaviour
     }
 
 
-
+    /* @author John Gansallo */
     public void ExportCSV()
     {
-        // TODO - John
-        /*  Export a CSV showing best fitness and avg fitness for each generation.
-            Maybe include info about the parameters used for this run as well
-            either at the beginning or the end, such as the fields in GolfSettings
-            as well as the timePerGen, mutationProb, crossoverProb, holeDist, holeDistRand etc.
-        */
-    }
+	    string path = Application.dataPath + @"/" + "fitness.csv";
+        if (!File.Exists(path))
+        {
+            // Create a file to write to.
+            using (StreamWriter gen = File.CreateText(path))
+            {
+                gen.WriteLine("Generation #,Best Fitness,Average Fitness");
+		        for (int i = 0; i < fitnessTrack.GetLength(0); i++)
+                {
+                    float avgFit = 0;
+                    float bestFit = Single.MinValue;
+                    for (int j = 0; j < numAgents; j++)
+                    {
+                        Debug.Log(j + " " + numAgents);
+                        avgFit += fitnessTrack[i,j];
+                        if (fitnessTrack[i,j] > bestFit)
+                            bestFit = fitnessTrack[i,j];
+                    }
+                    avgFit = avgFit / numAgents;
+                    gen.WriteLine((i + 1).ToString() + "," + bestFit + "," + avgFit);
+                }
+            }	
+        }
 
+    }
 }
