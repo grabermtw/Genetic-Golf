@@ -355,25 +355,25 @@ public class GeneticManager : MonoBehaviour
         
         for (int i = 0; i < parent.torques.Length; i++) {
 
-          Vector3 current = parent.torques[i];
+            Vector3 current = parent.torques[i];
 	  
-	  // Pick a random axis to mutate
-	  // 0: x-axis; 1: y-axis, 2: z-axis
-	  int mutationAxis = Random.Range(0,2);
-	  float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-	  Vector3 newMovement;
-	    
-	  if (mutationAxis == 0) {
-	    newMovement = new Vector3(current.x + mutation, current.y, current.z);
-		
-	  } else if (mutationAxis == 1) {
-	    newMovement = new Vector3(current.x, current.y + mutation, current.z);
-	   
-	  } else {
-	    newMovement = new Vector3(current.x, current.y, current.z + mutation);
-	  }
+            // Pick a random axis to mutate
+            // 0: x-axis; 1: y-axis, 2: z-axis
+            int mutationAxis = Random.Range(0,2);
+            float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+            Vector3 newMovement;
+                
+            if (mutationAxis == 0) {
+                newMovement = new Vector3(current.x + mutation, current.y, current.z);
+                
+            } else if (mutationAxis == 1) {
+                newMovement = new Vector3(current.x, current.y + mutation, current.z);
+            
+            } else {
+                newMovement = new Vector3(current.x, current.y, current.z + mutation);
+            }
 
-          torques[i] = newMovement;
+            torques[i] = newMovement;
         }
 
         return new Chromosome(torques);
