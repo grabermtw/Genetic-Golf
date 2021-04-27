@@ -296,7 +296,8 @@ public class GeneticManager3 : MonoBehaviour
             }
         }
         completionText.SetActive(true);
-        ExportCSV();
+        // ExportCSV()
+        GetComponent<Exporter>().FinishedSimulation();
         yield break;
     }
 
@@ -331,21 +332,21 @@ public class GeneticManager3 : MonoBehaviour
         {
             Tuple<float, Vector3, float> current = parent.jointMovements[mutationIndex][i];
 	    
-	    // Pick a random axis to mutate
-	    // 0: x-axis; 1: y-axis, 2: z-axis
-	    int mutationAxis = Random.Range(0,2);
-	    float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-	    Vector3 newMovement;
-	    
-	    if (mutationAxis == 0) {
-	    	newMovement = new Vector3(current.Item2.x + mutation, current.Item2.y, current.Item2.z);
-		
-	    } else if (mutationAxis == 1) {
-	    	newMovement = new Vector3(current.Item2.x, current.Item2.y + mutation, current.Item2.z);
-	   
-	    } else {
-	    	newMovement = new Vector3(current.Item2.x, current.Item2.y, current.Item2.z + mutation);
-	    }
+            // Pick a random axis to mutate
+            // 0: x-axis; 1: y-axis, 2: z-axis
+            int mutationAxis = Random.Range(0,2);
+            float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+            Vector3 newMovement;
+            
+            if (mutationAxis == 0) {
+                newMovement = new Vector3(current.Item2.x + mutation, current.Item2.y, current.Item2.z);
+            
+            } else if (mutationAxis == 1) {
+                newMovement = new Vector3(current.Item2.x, current.Item2.y + mutation, current.Item2.z);
+        
+            } else {
+                newMovement = new Vector3(current.Item2.x, current.Item2.y, current.Item2.z + mutation);
+            }
 
             // Mutate the time between joint movements and the time that the torque is applied for
             float mutationWaitTime = Random.Range(-MAX_TIME_BETWEEN_TORQUES, MAX_TIME_BETWEEN_TORQUES);
@@ -361,8 +362,14 @@ public class GeneticManager3 : MonoBehaviour
     }
 
 
+    public float[,] GetResults()
+    {
+        return fitnessTrack;
+    }
 
-    /* @author John Gansallo */
+
+    /* @author John Gansallo
+        Deprecated, see ExportCSV() in Export.cs */
     public void ExportCSV()
     {
 	    string filename = "numGens-" + numGens;

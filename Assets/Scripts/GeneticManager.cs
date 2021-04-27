@@ -48,17 +48,17 @@ public class GeneticManager : MonoBehaviour
     private TextMeshProUGUI currentGenText; // displays the current generation number
     
 
-    private GolferSettings.Fitness fitnessFunc;
-    private GolferSettings.MoveableJointsExtent moveableJoints;
-    private GolferSettings.ClubGrip clubGrip;
-    private int numAgents; // number of agents (golfers) in each generation
-    private float holeDist; // distance to the hole
-    private float holeDistRand; // range of offset that should be applied to the hole distance each generation
-    private float timePerGen; // amount of time dedicated to each generation before the golfers are cleared out and a new gen is created
-    private float crossoverProb;
-    private float mutationProb;
-    private int numGens;
-    private int numElites; // how many of the most fit individuals should be preserved.
+    public GolferSettings.Fitness fitnessFunc;
+    public GolferSettings.MoveableJointsExtent moveableJoints;
+    public GolferSettings.ClubGrip clubGrip;
+    public int numAgents; // number of agents (golfers) in each generation
+    public float holeDist; // distance to the hole
+    public float holeDistRand; // range of offset that should be applied to the hole distance each generation
+    public float timePerGen; // amount of time dedicated to each generation before the golfers are cleared out and a new gen is created
+    public float crossoverProb;
+    public float mutationProb;
+    public int numGens;
+    public int numElites; // how many of the most fit individuals should be preserved.
                                     // please keep this to an even number
     private Chromosome[] chroms;
     private GameObject[] agents;
@@ -321,7 +321,8 @@ public class GeneticManager : MonoBehaviour
             }
         }
         completionText.SetActive(true);
-        ExportCSV();
+        // ExportCSV()
+        GetComponent<Exporter>().FinishedSimulation();
         yield break;
     }
 
@@ -354,32 +355,39 @@ public class GeneticManager : MonoBehaviour
         
         for (int i = 0; i < parent.torques.Length; i++) {
 
-          Vector3 current = parent.torques[i];
+            Vector3 current = parent.torques[i];
 	  
-	  // Pick a random axis to mutate
-	  // 0: x-axis; 1: y-axis, 2: z-axis
-	  int mutationAxis = Random.Range(0,2);
-	  float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-	  Vector3 newMovement;
-	    
-	  if (mutationAxis == 0) {
-	    newMovement = new Vector3(current.x + mutation, current.y, current.z);
-		
-	  } else if (mutationAxis == 1) {
-	    newMovement = new Vector3(current.x, current.y + mutation, current.z);
-	   
-	  } else {
-	    newMovement = new Vector3(current.x, current.y, current.z + mutation);
-	  }
+            // Pick a random axis to mutate
+            // 0: x-axis; 1: y-axis, 2: z-axis
+            int mutationAxis = Random.Range(0,2);
+            float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+            Vector3 newMovement;
+                
+            if (mutationAxis == 0) {
+                newMovement = new Vector3(current.x + mutation, current.y, current.z);
+                
+            } else if (mutationAxis == 1) {
+                newMovement = new Vector3(current.x, current.y + mutation, current.z);
+            
+            } else {
+                newMovement = new Vector3(current.x, current.y, current.z + mutation);
+            }
 
-          torques[i] = newMovement;
+            torques[i] = newMovement;
         }
 
         return new Chromosome(torques);
     }
 
 
-    /* @author John Gansallo */
+    public float[,] GetResults()
+    {
+        return fitnessTrack;
+    }
+
+
+    /* @author John Gansallo
+        Deprecated, see ExportCSV() in Export.cs */
     public void ExportCSV()
     {
         string filename = "numGens-" + numGens;

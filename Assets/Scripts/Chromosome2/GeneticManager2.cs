@@ -295,7 +295,8 @@ public class GeneticManager2 : MonoBehaviour
             }
         }
         completionText.SetActive(true);
-        ExportCSV();
+        // ExportCSV()
+        GetComponent<Exporter>().FinishedSimulation();
         yield break;
     }
 
@@ -331,20 +332,20 @@ public class GeneticManager2 : MonoBehaviour
             Tuple<float, Vector3> current = parent.jointMovements[mutationIndex][i];
 
             // Pick a random axis to mutate
-	    // 0: x-axis; 1: y-axis, 2: z-axis
-	    int mutationAxis = Random.Range(0,2);
-	    float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
-	    Vector3 newMovement;
-	    
-	    if (mutationAxis == 0) {
-	    	newMovement = new Vector3(current.Item2.x + mutation, current.Item2.y, current.Item2.z);
-		
-	    } else if (mutationAxis == 1) {
-	    	newMovement = new Vector3(current.Item2.x, current.Item2.y + mutation, current.Item2.z);
-	   
-	    } else {
-	    	newMovement = new Vector3(current.Item2.x, current.Item2.y, current.Item2.z + mutation);
-	    }
+            // 0: x-axis; 1: y-axis, 2: z-axis
+            int mutationAxis = Random.Range(0,2);
+            float mutation = Random.Range(-INIT_TORQUE_MAG, INIT_TORQUE_MAG);
+            Vector3 newMovement;
+            
+            if (mutationAxis == 0) {
+                newMovement = new Vector3(current.Item2.x + mutation, current.Item2.y, current.Item2.z);
+            
+            } else if (mutationAxis == 1) {
+                newMovement = new Vector3(current.Item2.x, current.Item2.y + mutation, current.Item2.z);
+        
+            } else {
+                newMovement = new Vector3(current.Item2.x, current.Item2.y, current.Item2.z + mutation);
+            }
 
             // Mutate the time between joint movements
             float mutationTime = Random.Range(-MAX_TIME_BETWEEN_TORQUES, MAX_TIME_BETWEEN_TORQUES);
@@ -357,9 +358,14 @@ public class GeneticManager2 : MonoBehaviour
         return new Chromosome2(jointMovements);
     }
 
+    public float[,] GetResults()
+    {
+        return fitnessTrack;
+    }
 
 
-    /* @author John Gansallo */
+    /* @author John Gansallo
+        Deprecated, see ExportCSV() in Export.cs */
     public void ExportCSV()
     {
 	    string filename = "numGens-" + numGens;

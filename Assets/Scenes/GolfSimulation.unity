@@ -2833,7 +2833,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 12 minutes, 30 seconds
+  m_text: 33 minutes, 45 seconds
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3321,7 +3321,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 0
+  m_Text: 1
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -10056,7 +10056,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "0\u200B"
+  m_text: "1\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -12860,6 +12860,7 @@ GameObject:
   - component: {fileID: 2020030711}
   - component: {fileID: 2020030713}
   - component: {fileID: 2020030712}
+  - component: {fileID: 2020030714}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -12897,6 +12898,17 @@ MonoBehaviour:
   approxTime: {fileID: 329210421}
   simulationUI: {fileID: 1789788411}
   currentGenText: {fileID: 1004977729}
+  fitnessFunc: 0
+  moveableJoints: 0
+  clubGrip: 0
+  numAgents: 0
+  holeDist: 0
+  holeDistRand: 0
+  timePerGen: 0
+  crossoverProb: 0
+  mutationProb: 0
+  numGens: 0
+  numElites: 0
 --- !u!4 &2020030710
 Transform:
   m_ObjectHideFlags: 0
@@ -12990,6 +13002,18 @@ MonoBehaviour:
   approxTime: {fileID: 329210421}
   simulationUI: {fileID: 1789788411}
   currentGenText: {fileID: 1004977729}
+--- !u!114 &2020030714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020030708}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01f3a5957bad2a6438ab7d3424b38144, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2047633308
 GameObject:
   m_ObjectHideFlags: 0
