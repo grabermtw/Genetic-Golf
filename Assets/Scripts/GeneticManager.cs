@@ -123,6 +123,7 @@ public class GeneticManager : MonoBehaviour
             crossoverProb = float.Parse(crossoverProbInput.text);
             mutationProb = float.Parse(mutationProbInput.text);
             numGens = int.Parse(numGensInput.text);
+            numElites = int.Parse(elitismInput.text);
             if (mutationProb < 0 || mutationProb > 1 || crossoverProb < 0 || crossoverProb > 1)
             {
                 Debug.LogWarning("Crossover and mutation values should be between 0 and 1!");
