@@ -242,7 +242,7 @@ public class GeneticManager2 : MonoBehaviour
             for (int j = 0; j < numElites; j++)
             {
                 try {
-                    newChroms[i] = chroms[Array.FindIndex(fitnesses, x => x == sortedFitnesses[j])];
+                    newChroms[j] = chroms[Array.FindIndex(fitnesses, x => x == sortedFitnesses[j])];
                 }
                 catch {
                     Debug.LogWarning("something weird happened");
