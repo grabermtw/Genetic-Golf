@@ -58,7 +58,7 @@ public class Exporter : MonoBehaviour
             // Create a file to write to.
             using (StreamWriter gen = File.CreateText(path))
             {
-                gen.WriteLine("Generation #,Chrom1 Best Fitness,Chrom1 Average Fitness,Chrom1 Best Fitness,Chrom3 Average Fitness,Chrom3 Best Fitness,Chrom3 Average Fitness");
+                gen.WriteLine("Generation #,Chrom1 Best Fitness,Chrom1 Average Fitness,Chrom2 Best Fitness,Chrom2 Average Fitness,Chrom3 Best Fitness,Chrom3 Average Fitness");
 		        for (int i = 0; i < results1.GetLength(0); i++)
                 {
                     float avgFit1 = 0;
